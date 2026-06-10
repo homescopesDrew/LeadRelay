@@ -10,6 +10,15 @@ const profileSchema = z.object({
   zipCodes: z.array(z.string().regex(/^\d{5}$/)).max(25).optional(),
 });
 
+export async function GET() {
+  try {
+    const user = await requireUser();
+    return NextResponse.json({ user });
+  } catch {
+    return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  }
+}
+
 export async function PATCH(req: NextRequest) {
   try {
     const user = await requireUser();
