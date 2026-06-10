@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-steel-50 text-steel-900 font-body antialiased;
+  }
+  ::selection {
+    @apply bg-safety-500/90 text-white;
+  }
+  :focus-visible {
+    outline: 2px solid theme("colors.safety.500");
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-safety-500 text-white font-display font-semibold uppercase tracking-wide text-lg px-5 py-2.5 rounded-md hover:bg-safety-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-steel-900 text-white font-display font-semibold uppercase tracking-wide text-lg px-5 py-2.5 rounded-md hover:bg-steel-800 transition-colors;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 border border-steel-300 text-steel-700 font-display font-semibold uppercase tracking-wide text-lg px-5 py-2.5 rounded-md hover:border-steel-500 transition-colors;
+  }
+  .field {
+    @apply w-full rounded-md border border-steel-300 bg-white px-3 py-2 text-sm text-steel-900 placeholder-steel-400 focus:border-blueprint-500 focus:outline-none focus:ring-1 focus:ring-blueprint-500;
+  }
+  .label {
+    @apply block font-mono text-[11px] uppercase tracking-widest text-steel-500 mb-1;
+  }
+  /* Signature: job-ticket card with a perforated stub edge */
+  .ticket {
+    @apply relative bg-white rounded-lg shadow-ticket border border-steel-200;
+  }
+  .ticket::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 0;
+    border-left: 2px dashed theme("colors.steel.200");
+    margin-left: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

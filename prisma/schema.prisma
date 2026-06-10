@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  CONTRACTOR
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ELITE
+}
+
+enum LeadStatus {
+  AVAILABLE
+  SOLD
+  EXPIRED
+  REMOVED
+}
+
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+  EMERGENCY
+}
+
+model User {
+  id                   String           @id // mirrors Supabase auth.users id
+  email                String           @unique
+  role                 Role             @default(CONTRACTOR)
+  companyName          String?
+  phone                String?
+  trade                String?
+  zipCodes             String[]         @default([])
+  subscriptionPlan     SubscriptionPlan @default(FREE)
+  stripeCustomerId     String?          @unique
+  stripeSubscriptionId String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  leadsPosted   Lead[]            @relation("SellerLeads")
+  leadsBought   Lead[]            @relation("BuyerLeads")
+  purchases     Transaction[]     @relation("BuyerTransactions")
+  sales         Transaction[]     @relation("SellerTransactions")
+  notifications NotificationLog[]
+
+  @@index([trade])
+}
+
+model Lead {
+  id           String     @id @default(cuid())
+  sellerId     String
+  buyerId      String?
+  jobType      String
+  locationZip  String
+  budgetMin    Int
+  budgetMax    Int
+  description  String
+  urgency      Urgency    @default(MEDIUM)
+  price        Int // asking price in cents
+  contactName  String
+  contactPhone String
+  contactEmail String
+  photoUrls    String[]   @default([])
+  status       LeadStatus @default(AVAILABLE)
+  expiresAt    DateTime
+  soldAt       DateTime?
+  createdAt    DateTime   @default(now())
+
+  seller      User          @relation("SellerLeads", fields: [sellerId], references: [id])
+  buyer       User?         @relation("BuyerLeads", fields: [buyerId], references: [id])
+  transaction Transaction?
+
+  @@index([status, jobType, locationZip])
+  @@index([sellerId])
+}
+
+model Transaction {
+  id              String   @id @default(cuid())
+  leadId          String   @unique
+  buyerId         String
+  sellerId        String
+  amount          Int // total paid by buyer, in cents
+  fee             Int // marketplace fee, in cents
+  sellerPayout    Int // amount - fee, in cents
+  stripePaymentId String   @unique
+  createdAt       DateTime @default(now())
+
+  lead   Lead @relation(fields: [leadId], references: [id])
+  buyer  User @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  seller User @relation("SellerTransactions", fields: [sellerId], references: [id])
+
+  @@index([createdAt])
+}
+
+model NotificationLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  type      String // NEW_LEAD_MATCH | LEAD_SOLD_BUYER | LEAD_SOLD_SELLER | WEEKLY_SUMMARY | ADMIN_ALERT | MONTHLY_REPORT
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([type, createdAt])
+}
+
+model SystemEvent {
+  id        String   @id @default(cuid())
+  type      String // CRON_CLEANUP | CRON_WEEKLY | CRON_MONTHLY | STRIPE_WEBHOOK | ERROR | PAYMENT_FAILED
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+}
