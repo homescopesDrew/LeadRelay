@@ -44,4 +44,3 @@ example
 
 # env files with secrets
 .env
-.mcp.json
