@@ -1,5 +1,10 @@
 import Stripe from "stripe";
 
+/** True when a real Stripe secret key is present (payments can be attempted). */
+export function isStripeConfigured(): boolean {
+  return !!process.env.STRIPE_SECRET_KEY;
+}
+
 // Lazily construct the Stripe client so importing this module (e.g. during
 // `next build` page-data collection) doesn't require STRIPE_SECRET_KEY to be set.
 // The client is only built on first property access, inside a request handler.

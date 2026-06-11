@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, logSystemEvent } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { stripe } from "@/lib/stripe";
+import { stripe, isStripeConfigured } from "@/lib/stripe";
 import { canPurchase, purchasesThisMonth } from "@/lib/marketplace";
 
 /** Creates a one-time Stripe Checkout session for buying a lead. */
 export async function POST(req: NextRequest) {
   try {
+    if (!isStripeConfigured())
+      return NextResponse.json(
+        { error: "Purchases aren't live yet — payments are still being set up. Check back soon." },
+        { status: 503 }
+      );
     const user = await requireUser();
     const { leadId } = await req.json();
 

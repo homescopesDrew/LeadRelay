@@ -21,13 +21,20 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
     const supabase = createSupabaseBrowserClient();
 
     if (mode === "signup") {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: { emailRedirectTo: `${window.location.origin}/api/auth/callback` },
       });
       setLoading(false);
       if (error) return setError(error.message);
+      // When email confirmation is disabled, Supabase returns a live session —
+      // go straight to the dashboard instead of asking the user to check email.
+      if (data.session) {
+        router.push("/dashboard");
+        router.refresh();
+        return;
+      }
       setNotice("Check your email to confirm your account, then sign in.");
       return;
     }

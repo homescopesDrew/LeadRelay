@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, logSystemEvent } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
-import { stripe, PLAN_CONFIG } from "@/lib/stripe";
+import { stripe, PLAN_CONFIG, isStripeConfigured } from "@/lib/stripe";
 
 /** Creates a subscription Checkout session for Pro/Elite. */
 export async function POST(req: NextRequest) {
   try {
+    if (!isStripeConfigured())
+      return NextResponse.json(
+        { error: "Upgrades aren't live yet — payments are still being set up. Check back soon." },
+        { status: 503 }
+      );
     const user = await requireUser();
     const { plan } = (await req.json()) as { plan: "PRO" | "ELITE" };
     const priceId = PLAN_CONFIG[plan]?.priceId;
