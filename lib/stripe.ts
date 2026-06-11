@@ -1,8 +1,23 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-06-20",
-  typescript: true,
+// Lazily construct the Stripe client so importing this module (e.g. during
+// `next build` page-data collection) doesn't require STRIPE_SECRET_KEY to be set.
+// The client is only built on first property access, inside a request handler.
+let stripeClient: Stripe | null = null;
+function getStripe(): Stripe {
+  if (!stripeClient) {
+    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2024-06-20",
+      typescript: true,
+    });
+  }
+  return stripeClient;
+}
+
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getStripe(), prop, receiver);
+  },
 });
 
 export const PLAN_CONFIG = {

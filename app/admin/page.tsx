@@ -48,98 +48,133 @@ export default async function AdminPage() {
     d ? d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "never";
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 space-y-10">
-      <h1 className="font-display text-4xl font-bold uppercase tracking-wide">Owner console</h1>
-
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <StatCard label="Total users" value={String(totalUsers)} />
-        <StatCard label="Leads posted" value={String(leadsPosted)} />
-        <StatCard label="Leads sold" value={String(leadsSold)} />
-        <MoneyCard label="Fee revenue (all-time)" cents={feeRevenue._sum.fee ?? 0} />
-        <MoneyCard label="Subscription MRR" cents={mrr} hint={`${proCount} Pro · ${eliteCount} Elite`} />
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-4">
-        <BarChart title="Top trades" rows={topTrades.map((t) => ({ label: t.jobType, value: t._count }))} />
-        <BarChart title="Top ZIP codes" rows={topZips.map((z) => ({ label: z.locationZip, value: z._count }))} />
-      </div>
-
-      <section>
-        <h2 className="font-display text-2xl font-bold uppercase tracking-wide mb-3">System health</h2>
-        <div className="grid sm:grid-cols-3 gap-4">
-          <StatCard label="Last cron run" value={fmtTime(lastCron?.createdAt)} hint={lastCron?.type ?? undefined} />
-          <StatCard label="Last Stripe webhook" value={fmtTime(lastWebhook?.createdAt)} />
-          <StatCard
-            label="Errors (last 10 shown)"
-            value={String(recentErrors.length)}
-            hint={recentErrors.length ? "Review the log below" : "All clear"}
-          />
+    <div>
+      {/* Admin header */}
+      <div className="bg-steel-900 text-white border-b border-white/10">
+        <div className="mx-auto max-w-7xl px-6 py-10">
+          <div className="flex items-center gap-3">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            <h1 className="font-display text-5xl font-bold uppercase tracking-wide">Owner Console</h1>
+          </div>
+          <p className="mt-1 text-steel-400 text-sm">System metrics, moderation, and user management</p>
         </div>
-        {recentErrors.length > 0 && (
-          <div className="ticket mt-4 p-4 pl-8 overflow-x-auto">
-            <h3 className="label">Error log</h3>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 py-10 space-y-10">
+        {/* Metrics */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <StatCard label="Total users" value={String(totalUsers)} icon="👥" />
+          <StatCard label="Leads posted" value={String(leadsPosted)} icon="📋" />
+          <StatCard label="Leads sold" value={String(leadsSold)} icon="✅" />
+          <MoneyCard label="Fee revenue" cents={feeRevenue._sum.fee ?? 0} icon="💵" />
+          <MoneyCard label="Subscription MRR" cents={mrr} hint={`${proCount} Pro · ${eliteCount} Elite`} icon="📈" />
+        </div>
+
+        {/* Charts */}
+        <div className="grid lg:grid-cols-2 gap-5">
+          <BarChart title="Top trades" rows={topTrades.map((t) => ({ label: t.jobType, value: t._count }))} />
+          <BarChart title="Top ZIP codes" rows={topZips.map((z) => ({ label: z.locationZip, value: z._count }))} />
+        </div>
+
+        {/* System health */}
+        <section>
+          <h2 className="font-display text-2xl font-bold uppercase tracking-wide mb-4 text-steel-900">System health</h2>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <StatCard label="Last cron run" value={fmtTime(lastCron?.createdAt)} hint={lastCron?.type ?? undefined} icon="⏱" />
+            <StatCard label="Last Stripe webhook" value={fmtTime(lastWebhook?.createdAt)} icon="🔔" />
+            <StatCard
+              label="Errors (last 10)"
+              value={String(recentErrors.length)}
+              hint={recentErrors.length ? "Review the log below" : "All clear"}
+              icon={recentErrors.length ? "🚨" : "✅"}
+            />
+          </div>
+          {recentErrors.length > 0 && (
+            <div className="ticket mt-4 overflow-x-auto">
+              <div className="p-4 border-b border-steel-100">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-steel-500">Error log</h3>
+              </div>
+              <table className="w-full text-sm">
+                <thead className="bg-steel-50">
+                  <tr className="text-left text-xs font-semibold uppercase tracking-wider text-steel-500">
+                    <th className="px-4 py-3">When</th>
+                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3">Detail</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentErrors.map((e) => (
+                    <tr key={e.id} className="border-t border-steel-100 align-top hover:bg-steel-50/60">
+                      <td className="px-4 py-3 whitespace-nowrap text-steel-500 text-xs">{fmtTime(e.createdAt)}</td>
+                      <td className="px-4 py-3 font-mono text-xs text-danger">{e.type}</td>
+                      <td className="px-4 py-3 text-steel-600 text-xs break-all max-w-xs">{JSON.stringify(e.metadata)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* Newest users */}
+        <section>
+          <h2 className="font-display text-2xl font-bold uppercase tracking-wide mb-4 text-steel-900">Newest users</h2>
+          <div className="ticket overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left font-mono text-[11px] uppercase tracking-widest text-steel-500">
-                  <th className="py-1 pr-4">When</th>
-                  <th className="py-1 pr-4">Type</th>
-                  <th className="py-1">Detail</th>
+              <thead className="bg-steel-50 border-b border-steel-100">
+                <tr className="text-left text-xs font-semibold uppercase tracking-wider text-steel-500">
+                  <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3">Trade</th>
+                  <th className="px-4 py-3">Plan</th>
+                  <th className="px-4 py-3">Joined</th>
                 </tr>
               </thead>
               <tbody>
-                {recentErrors.map((e) => (
-                  <tr key={e.id} className="border-t border-steel-100 align-top">
-                    <td className="py-2 pr-4 whitespace-nowrap text-steel-500">{fmtTime(e.createdAt)}</td>
-                    <td className="py-2 pr-4 font-mono text-xs">{e.type}</td>
-                    <td className="py-2 text-steel-600 break-all">{JSON.stringify(e.metadata)}</td>
+                {recentUsers.map((u) => (
+                  <tr key={u.id} className="border-t border-steel-100 hover:bg-steel-50/60">
+                    <td className="px-4 py-3 font-medium text-steel-900">{u.email}</td>
+                    <td className="px-4 py-3 text-steel-600">{u.trade ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                          u.subscriptionPlan === "ELITE"
+                            ? "bg-safety-500/10 text-safety-600 border border-safety-500/20"
+                            : u.subscriptionPlan === "PRO"
+                            ? "bg-blueprint-500/10 text-blueprint-600 border border-blueprint-500/20"
+                            : "bg-steel-100 text-steel-500 border border-steel-200"
+                        }`}
+                      >
+                        {u.subscriptionPlan}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-steel-500 text-xs">{fmtTime(u.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
-      </section>
+        </section>
 
-      <section>
-        <h2 className="font-display text-2xl font-bold uppercase tracking-wide mb-3">Newest users</h2>
-        <div className="ticket p-4 pl-8 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left font-mono text-[11px] uppercase tracking-widest text-steel-500">
-                <th className="py-1 pr-4">Email</th>
-                <th className="py-1 pr-4">Trade</th>
-                <th className="py-1 pr-4">Plan</th>
-                <th className="py-1">Joined</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentUsers.map((u) => (
-                <tr key={u.id} className="border-t border-steel-100">
-                  <td className="py-2 pr-4">{u.email}</td>
-                  <td className="py-2 pr-4">{u.trade ?? "—"}</td>
-                  <td className="py-2 pr-4 font-mono text-xs">{u.subscriptionPlan}</td>
-                  <td className="py-2 text-steel-500">{fmtTime(u.createdAt)}</td>
-                </tr>
+        {/* Lead moderation */}
+        <section>
+          <h2 className="font-display text-2xl font-bold uppercase tracking-wide mb-4 text-steel-900">Lead moderation</h2>
+          {flaggableLeads.length === 0 ? (
+            <div className="ticket p-8 text-center text-sm text-steel-400">No leads to review.</div>
+          ) : (
+            <ul className="space-y-3">
+              {flaggableLeads.map((l) => (
+                <li key={l.id} className="ticket p-5 flex items-center justify-between gap-4 flex-wrap">
+                  <div className="min-w-0">
+                    <div className="font-display text-lg font-semibold uppercase text-steel-900">{l.jobType} — ZIP {l.locationZip}</div>
+                    <div className="text-sm text-steel-500 line-clamp-1 max-w-xl mt-0.5">{l.description}</div>
+                  </div>
+                  <ModerateLeadButton leadId={l.id} />
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section>
-        <h2 className="font-display text-2xl font-bold uppercase tracking-wide mb-3">Lead moderation</h2>
-        <ul className="space-y-2">
-          {flaggableLeads.map((l) => (
-            <li key={l.id} className="ticket p-4 pl-8 flex items-center justify-between gap-3 flex-wrap">
-              <div>
-                <div className="font-display text-lg font-semibold uppercase">{l.jobType} — ZIP {l.locationZip}</div>
-                <div className="text-sm text-steel-600 line-clamp-1 max-w-xl">{l.description}</div>
-              </div>
-              <ModerateLeadButton leadId={l.id} />
-            </li>
-          ))}
-        </ul>
-      </section>
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

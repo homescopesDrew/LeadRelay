@@ -1,7 +1,13 @@
 import { Resend } from "resend";
 import { db, logSystemEvent } from "@/lib/db";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resendClient: Resend | null = null;
+function getResend(): Resend | null {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return null;
+  if (!resendClient) resendClient = new Resend(key);
+  return resendClient;
+}
 const FROM = process.env.EMAIL_FROM ?? "LeadRelay <onboarding@resend.dev>";
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
@@ -34,6 +40,11 @@ async function send(opts: {
   userId?: string;
   metadata?: Record<string, unknown>;
 }) {
+  const resend = getResend();
+  if (!resend) {
+    console.warn("RESEND_API_KEY not set — skipping email", opts.logType);
+    return;
+  }
   try {
     await resend.emails.send({ from: FROM, to: opts.to, subject: opts.subject, html: opts.html });
     await db.notificationLog.create({

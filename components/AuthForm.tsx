@@ -40,10 +40,18 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="ticket p-6 pl-10 space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="label" htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" required autoComplete="email" className="field" />
+        <label className="label" htmlFor="email">Email address</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          className="field"
+          placeholder="you@company.com"
+        />
       </div>
       <div>
         <label className="label" htmlFor="password">Password</label>
@@ -55,13 +63,22 @@ export default function AuthForm({ mode }: { mode: "login" | "signup" }) {
           minLength={8}
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
           className="field"
+          placeholder={mode === "signup" ? "Min 8 characters" : "••••••••"}
         />
       </div>
-      <button type="submit" disabled={loading} className="btn-primary w-full">
+      <button type="submit" disabled={loading} className="btn-primary w-full justify-center !py-3">
         {loading ? "Working…" : mode === "signup" ? "Create account" : "Sign in"}
       </button>
-      {error && <p role="alert" className="text-sm text-safety-600">{error}</p>}
-      {notice && <p role="status" className="text-sm text-blueprint-700">{notice}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-danger bg-danger/5 border border-danger/20 rounded-lg px-3 py-2.5">
+          {error}
+        </p>
+      )}
+      {notice && (
+        <p role="status" className="text-sm text-blueprint-600 bg-blueprint-500/5 border border-blueprint-500/20 rounded-lg px-3 py-2.5">
+          {notice}
+        </p>
+      )}
     </form>
   );
 }

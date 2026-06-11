@@ -19,7 +19,7 @@ export default function MarketplaceFilters() {
   }
 
   return (
-    <form onSubmit={apply} className="grid grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+    <form onSubmit={apply} className="grid grid-cols-2 lg:grid-cols-5 gap-4 items-end">
       <div>
         <label className="label" htmlFor="trade">Trade</label>
         <select id="trade" name="trade" defaultValue={params.get("trade") ?? ""} className="field">
@@ -35,7 +35,14 @@ export default function MarketplaceFilters() {
       </div>
       <div>
         <label className="label" htmlFor="maxPrice">Max lead price ($)</label>
-        <input id="maxPrice" name="maxPrice" type="number" min={5} defaultValue={params.get("maxPrice") ?? ""} className="field" />
+        <input
+          id="maxPrice"
+          name="maxPrice"
+          type="number"
+          min={5}
+          defaultValue={params.get("maxPrice") ?? ""}
+          className="field"
+        />
       </div>
       <div>
         <label className="label" htmlFor="urgency">Urgency</label>
@@ -47,7 +54,7 @@ export default function MarketplaceFilters() {
           <option value="LOW">Low</option>
         </select>
       </div>
-      <button type="submit" className="btn-secondary !text-base !py-2">Filter</button>
+      <button type="submit" className="btn-primary">Search</button>
     </form>
   );
 }

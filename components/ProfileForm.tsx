@@ -42,14 +42,14 @@ export default function ProfileForm({ initial }: Props) {
   }
 
   return (
-    <form onSubmit={save} className="grid sm:grid-cols-2 gap-4">
+    <form onSubmit={save} className="grid sm:grid-cols-2 gap-5">
       <div>
         <label className="label" htmlFor="companyName">Company name</label>
-        <input id="companyName" name="companyName" defaultValue={initial.companyName} className="field" />
+        <input id="companyName" name="companyName" defaultValue={initial.companyName} className="field" placeholder="Acme Contracting" />
       </div>
       <div>
         <label className="label" htmlFor="phone">Phone</label>
-        <input id="phone" name="phone" defaultValue={initial.phone} className="field" />
+        <input id="phone" name="phone" defaultValue={initial.phone} className="field" placeholder="(555) 000-0000" />
       </div>
       <div>
         <label className="label" htmlFor="trade">Primary trade</label>
@@ -61,13 +61,26 @@ export default function ProfileForm({ initial }: Props) {
         </select>
       </div>
       <div>
-        <label className="label" htmlFor="zipCodes">Service area ZIPs (comma-separated)</label>
-        <input id="zipCodes" name="zipCodes" defaultValue={initial.zipCodes.join(", ")} placeholder="48080, 48081, 48082" className="field" />
+        <label className="label" htmlFor="zipCodes">Service area ZIPs</label>
+        <input
+          id="zipCodes"
+          name="zipCodes"
+          defaultValue={initial.zipCodes.join(", ")}
+          placeholder="48080, 48081, 48082"
+          className="field"
+        />
+        <p className="mt-1 text-xs text-steel-400">Comma-separated 5-digit codes for lead alerts</p>
       </div>
-      <div className="sm:col-span-2 flex items-center gap-3">
-        <button type="submit" className="btn-secondary !text-base">Save profile</button>
-        {saved && <span role="status" className="text-sm text-blueprint-700">Profile saved. Lead alerts now use these settings.</span>}
-        {error && <span role="alert" className="text-sm text-safety-600">{error}</span>}
+      <div className="sm:col-span-2 flex items-center gap-4 pt-2">
+        <button type="submit" className="btn-primary !text-sm !py-2">Save profile</button>
+        {saved && (
+          <span role="status" className="text-sm text-success font-medium flex items-center gap-1.5">
+            <span>✓</span> Profile saved — lead alerts updated
+          </span>
+        )}
+        {error && (
+          <span role="alert" className="text-sm text-danger">{error}</span>
+        )}
       </div>
     </form>
   );

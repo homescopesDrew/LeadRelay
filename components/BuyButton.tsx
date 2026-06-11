@@ -24,12 +24,14 @@ export default function BuyButton({ leadId, priceLabel }: { leadId: string; pric
   }
 
   return (
-    <div>
-      <button onClick={buy} disabled={loading} className="btn-primary w-full sm:w-auto">
+    <div className="space-y-3">
+      <button onClick={buy} disabled={loading} className="btn-primary w-full justify-center !py-3">
         {loading ? "Opening checkout…" : `Buy this lead — ${priceLabel}`}
       </button>
       {error && (
-        <p role="alert" className="mt-2 text-sm text-safety-600">{error}</p>
+        <p role="alert" className="text-sm text-danger bg-danger/5 border border-danger/20 rounded-lg px-3 py-2.5">
+          {error}
+        </p>
       )}
     </div>
   );

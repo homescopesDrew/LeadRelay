@@ -20,7 +20,11 @@ export default function ModerateLeadButton({ leadId }: { leadId: string }) {
   }
 
   return (
-    <button onClick={remove} disabled={busy} className="btn-ghost !text-sm !py-1.5 !px-3">
+    <button
+      onClick={remove}
+      disabled={busy}
+      className="btn-danger !text-sm !py-1.5 !px-4"
+    >
       {busy ? "Removing…" : "Remove lead"}
     </button>
   );
